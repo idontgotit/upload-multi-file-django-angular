@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="row" ng-app="myApp" ng-controller="RegisterController">
+        <div class="col-md-4 col-md-offset-4"></div>
+        <div class="col-md-4 col-md-offset-4">
+            <div class="well">
+                <div>
+                    <span ng-show="loginForm" ng-init="loginForm = true">
+                         <h1>Login or Register</h1>
+                        <form role="form" ng-submit="register()" name="registerForm">
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="login__email">Username</label>
+                                <input type="text" class="form-control" id="login__user" ng-model="username" required
+                                />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="login__password">Password</label>
+                                <input type="password" class="form-control" id="login__password" ng-model="password"
+                                       required
+                                />
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                            </div>
+                        </form>
+                        <br/>
+                        <div>
+                            <button ng-click="login(username)" class="btn btn-primary">Login</button>
+                        </div>
+                    </span>
+
+
+                    <span ng-show="show">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                Get data from api . Your user
+                            </div>
+                            <div class="col-sm-4"></div>
+                            <div class="col-sm-4" style="text-align: right">
+                                <button type="submit" class="btn btn-primary"
+                                        ng-click="backLogin()">Back to login</button>
+                            </div>
+
+                        </div>
+                        <input type="text" class="form-control" ng-value="resultUsername" ng-model="resultUsername"
+                               ng-readonly="true">
+                        <input type="text" class="form-control" ng-value="resultPassword" ng-model="resultPassword"
+                               ng-readonly="true">
+                        <br/>
+
+                        <h5>All Post This User</h5>
+                        <div ng-repeat="x in allPosts" style="border:solid 1px;margin-bottom: 30px;">
+                             <label>Post : </label>
+                                {$ x.title $}
+
+                            <br/>
+                            <label>Body : </label>
+                                {$ x.body $}
+                            <br/>
+                            <label>Image : </label>
+                            <div ng-repeat="image in x.experiments">
+                                <img ng-src="{$image.samplesheet$}"
+                                     height=128
+                                     width=128 alt="share resources" class="pull-left img-circle"/>
+                                <br/>
+                            </div>
+
+                        </div>
+
+
+                <br/>
+                <h5>Create a New Post</h5>
+                <form class="form-inline">
+                    <div class="form-group block-level">
+                        <input type="text" class="form-control" ng-model="newPost.title" placeholder="Title">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" ng-model="newPost.body" placeholder="Body">
+                    </div>
+                    <div class="form-group">
+{#                        <input type="file" file-model="files" multiple/>#}
+                        <input type="file" ng-file-model="files" multiple/>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" ng-click="saveNewPost()">Add Post</button>
+                    </div>
+                </form>
+                {#            <form ng-submit="uploadFile()">#}
+                {#                <input type="file" file-model="$parent.files" multiple/>#}
+                {#            </form>#}
+
+                </span>
+
+                </div>
+                {#                <form>#}
+                {#                    <h2>Load image here </h2>#}
+                {#                    <div ng-repeat="result in results">#}
+                {#                        <img ng-src="{$result.samplesheet$}" ng-alt="{$result.id$}" ng-title="{$result.id$}"#}
+                {#                             height=128#}
+                {#                             width=128 alt="share resources" class="pull-left img-circle"/>#}
+                {#                        <br/>#}
+                {#                    </div>#}
+                {#                    <br/>#}
+                {##}
+                {#                    <button ng-click="loadImage()">Load Image</button>#}
+                {#                </form>#}
+
+
+                {#                <input type="file" ng-file-model="files" multiple/>#}
+                {#                <button type="button" ng-click="upload()">Upload</button>#}
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock content %}
+
+
+
