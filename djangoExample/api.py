@@ -66,7 +66,18 @@ class PostList(PostMixin, generics.ListCreateAPIView):
 
 
 class PostDetail(PostMixin, generics.RetrieveUpdateDestroyAPIView):
-    pass
+    def put(self, request,pk, format=None):
+        instance = self.get_object()
+        serializer = PostSerializer(instance, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self,request, pk, format=None):
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserPostList(generics.ListAPIView):
@@ -175,13 +186,15 @@ class ExperimentViewSet(APIView):
         for i in range(int(length)):
             obj = Experiment.objects.create(post=create_post)
             # obj.samplesheet = self.request.FILES.get('file')
-            obj.samplesheet = self.request.FILES.get('userpic'+str(i)+'[]');
+            obj.samplesheet = self.request.FILES.get('userpic' + str(i) + '[]');
             obj.save()
         # import pdb
         # pdb.set_trace()
 
 
         return Response(status=status.HTTP_201_CREATED)
+
+
 # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

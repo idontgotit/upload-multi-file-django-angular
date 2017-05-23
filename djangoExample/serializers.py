@@ -21,6 +21,9 @@ class ExperimentSerializer(ModelSerializer):
         model = Experiment
         fields = '__all__'
 
+def required(value):
+    if value is None:
+        raise serializers.ValidationError('This field is required')
 
 class PostSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False, read_only=True)
@@ -32,7 +35,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     author_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source='author', write_only=True)
-
+    title = serializers.CharField(validators=[required])
+    number_positive = serializers.IntegerField(validators=[required])
+    number_float = serializers.FloatField(validators=[required])
     # author = serializers.HyperlinkedRelatedField(view_name='user-detail', lookup_field='username')
 
     # def get_validation_exclusions(self, *args, **kwargs):

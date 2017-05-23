@@ -12,16 +12,16 @@ app.config(function ($interpolateProvider, $httpProvider) {
 });
 
 
-app.controller('RegisterController', function ($scope, $http, $localStorage, FileUploader) {
+app.controller('RegisterController', function ($scope, $http, $localStorage) {
 
 
-    var uploader = $scope.uploader = new FileUploader({
-        url: '/api/experiments/',
-        method: 'POST',
-        alias: "file",
-
-
-    });
+    // var uploader = $scope.uploader = new FileUploader({
+    //     url: '/api/experiments/',
+    //     method: 'POST',
+    //     alias: "file",
+    //
+    //
+    // });
 
 
     function successFn() {
@@ -82,11 +82,18 @@ app.controller('RegisterController', function ($scope, $http, $localStorage, Fil
         $http({
             method: 'POST',
             url: '/api/posts',
-            data: {'title': $scope.newPost.title, 'body': $scope.newPost.body, 'author_id': $localStorage.userId}
+            data: {
+                'title': $scope.newPost.title,
+                'body': $scope.newPost.body,
+                'number_positive': $scope.newPost.number_positive,
+                'number_float': $scope.newPost.number_float,
+                'author_id': $localStorage.userId,
+            }
         }).then(function (response) {
                 $scope.uploadFile(response.data.id)
                     .then(function reloadPage(response) {
                             loadAlldataInUser();
+                            // $scope.createNewPost.$setPristine();
                         }
                     );
             }, function (response) {
@@ -104,7 +111,7 @@ app.controller('RegisterController', function ($scope, $http, $localStorage, Fil
         // }
         formData.append('length', $scope.files.length);
         for (var i = 0; i < $scope.files.length; i++) {
-           formData.append('userpic'+i+"[]", $scope.files[i]._file);
+            formData.append('userpic' + i + "[]", $scope.files[i]._file);
         }
         // formData.append('userpic[]', $scope.files[0]._file, 'chris1.jpg');
         // formData.append('userpic[]', $scope.files[1]._file, 'chris2.jpg');
@@ -150,6 +157,105 @@ app.controller('RegisterController', function ($scope, $http, $localStorage, Fil
         alert($scope.files.length + " files selected ... Write your Upload Code");
     };
 
+    $scope.deletePost = function (current_post) {
+        $http({
+            method: 'DELETE',
+            url: '/api/posts/' + current_post.id,
+        }).then(function (response) {
+                loadAlldataInUser();
+            }, function (response) {
+            }
+        );
+    };
+
+    function findDiff(original, edited, exclude_field) {
+        var diff = {}
+        for (var key in original) {
+            if ((exclude_field.indexOf(key) === -1) && (original[key] !== edited[key]))
+                diff[key] = edited[key];
+        }
+        return diff;
+    }
+
+    function countProperties(obj) {
+        var count = 0;
+        // var data = {};
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    $scope.saveEditPost = function (edited_post, origin_post) {
+        var exclude_field = ['experiments', 'author', '$$hashKey', 'viewMode'];
+        var fieldChange = findDiff(origin_post, edited_post, exclude_field);
+        debugger;
+        if (countProperties(fieldChange) >= 4) {
+            $http({
+                method: 'PUT',
+                url: '/api/posts/' + origin_post.id,
+                data: {
+                    'title': edited_post.title,
+                    'body': edited_post.body,
+                    'number_positive': edited_post.number_positive,
+                    'number_float': edited_post.number_float,
+                }
+            }).then(function (response) {
+                    edited_post.viewMode = true;
+                    loadAlldataInUser();
+                    // $scope.uploadFile(current_post.id)
+                    //     .then(function reloadPage(response) {
+                    //             loadAlldataInUser();
+                    //             // $scope.createNewPost.$setPristine();
+                    //         }
+                    //     );
+                }, function (response, status, headers, config) {
+                    if (response.data.title) {
+                        alert(' Field Title ' + response.data.title);
+                    }
+                    if (response.data.number_positive) {
+                        alert(' Field Number Positive ' + response.data.number_positive);
+                    }
+                    if (response.data.number_float) {
+                        alert(' Field Number Float ' + response.data.number_float);
+                    }
+                }
+            );
+        }
+        else {
+            $http({
+                method: 'PATCH',
+                url: '/api/posts/' + origin_post.id,
+                data: fieldChange
+            }).then(function (response) {
+                    edited_post.viewMode = true;
+                    loadAlldataInUser();
+                }, function (response, status, headers, config) {
+                    if (response.data.title) {
+                        alert(' Field Title ' + response.data.title);
+                    }
+                    if (response.data.number_positive) {
+                        alert(' Field Number Positive ' + response.data.number_positive);
+                    }
+                    if (response.data.number_float) {
+                        alert(' Field Number Float ' + response.data.number_float);
+                    }
+                }
+            );
+        }
+
+    }
+
+    $scope.editPost = function (current_post) {
+        $scope.selectedPost = angular.copy(current_post);
+        current_post.viewMode = false;
+    };
+    $scope.cancelEditPost = function (current_post) {
+        $scope.selectedPost = {};
+        current_post.viewMode = true;
+    };
 });
 
 app.directive('fileModel', ['$parse', function ($parse) {

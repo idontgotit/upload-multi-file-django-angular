@@ -30,7 +30,7 @@
                         </form>
                         <br/>
                         <div>
-                            <button ng-click="login(username)" class="btn btn-primary">Login</button>
+                            <button ng-click="login(username)" class="btn btn-primary" style="width: 96px;">Login</button>
                         </div>
                     </span>
 
@@ -54,13 +54,107 @@
                         <br/>
 
                         <h5>All Post This User</h5>
-                        <div ng-repeat="x in allPosts" style="border:solid 1px;margin-bottom: 30px;">
-                             <label>Post : </label>
-                                {$ x.title $}
-
+                        <div ng-repeat="x in allPosts" style="border:solid 1px;margin-bottom: 30px;"
+                             ng-init="x.viewMode=true">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <button class="btn btn-success" ng-click="editPost(x)" ng-show="x.viewMode">Edit post</button>
+                                    <div ng-show="!x.viewMode">
+                                         <button class="btn btn-success" ng-click="saveEditPost(selectedPost,x)"
+                                                 style="width: 115px;">Save edit</button>
+                                         <button class="btn btn-warning"
+                                                 ng-click="cancelEditPost(x)">Cancel edit</button>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4"></div>
+                                <div class="col-sm-4" style="text-align: right">
+                                    <button class="btn btn-danger" ng-click="deletePost(x)">Delete post</button>
+                                </div>
+                            </div>
                             <br/>
-                            <label>Body : </label>
-                                {$ x.body $}
+
+                            <div ng-show="x.viewMode">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Post title : </label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        {$ x.title $}
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Body : </label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                         {$ x.body $}
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Number Positive</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                         {$ x.number_positive $}
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <label>Number Float :</label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        {$ x.number_float $}
+                                    </div>
+                                </div>
+                            </div>
+
+                             <div ng-show="!x.viewMode">
+                                 <form name="editForm">
+                                     <div class="row">
+                                        <div class="col-sm-4">
+                                     <label>Post title : </label>
+                                        </div>
+                                    <div class="col-sm-4">
+                                     <input type="text" ng-model="selectedPost.title" required name="title"/>
+                                         </div>
+                                    </div>
+                                    <br/>
+                                     <div class="row">
+                                        <div class="col-sm-4">
+                                    <label>Body : </label>
+                                            </div>
+                                    <div class="col-sm-4">
+                                        <input type="text" ng-model="selectedPost.body" name="body"/>
+                                         </div>
+                                    </div>
+                                    <br/>
+                                     <div class="row">
+                                        <div class="col-sm-4">
+                                    <label>Number Positive : </label>
+                                              </div>
+                                    <div class="col-sm-4">
+                                      <input type="text" ng-model="selectedPost.number_positive"
+                                             name="number_positive"/>
+                                        </div>
+                                    </div>
+                                    <br/>
+                                     <div class="row">
+                                        <div class="col-sm-4">
+                                    <label>Number Float : </label>
+                                              </div>
+                                    <div class="col-sm-4">
+                                    <input type="text" ng-model="selectedPost.number_float" name="number_float"/>
+                                         </div>
+                                    </div>
+                                 </form>
+                            </div>
+
+
+
+
                             <br/>
                             <label>Image : </label>
                             <div ng-repeat="image in x.experiments">
@@ -75,21 +169,31 @@
 
                 <br/>
                 <h5>Create a New Post</h5>
-                <form class="form-inline">
-                    <div class="form-group block-level">
-                        <input type="text" class="form-control" ng-model="newPost.title" placeholder="Title">
-                    </div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" ng-model="newPost.body" placeholder="Body">
-                    </div>
-                    <div class="form-group">
-{#                        <input type="file" file-model="files" multiple/>#}
-                        <input type="file" ng-file-model="files" multiple/>
-                    </div>
-                    <div>
-                        <button class="btn btn-success" ng-click="saveNewPost()">Add Post</button>
-                    </div>
-                </form>
+                <div>
+                    <form class="form-inline">
+                        <div class="form-group block-level">
+                            <input type="text" class="form-control" ng-model="newPost.title" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="newPost.body" placeholder="Body">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="newPost.number_positive"
+                                   placeholder="Number Positive">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" ng-model="newPost.number_float"
+                                   placeholder="Number Float">
+                        </div>
+                        <div class="form-group">
+    {#                        <input type="file" file-model="files" multiple/>#}
+                            <input type="file" ng-file-model="files" multiple/>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" ng-click="saveNewPost()">Add Post</button>
+                        </div>
+                    </form>
+                </div>
                 {#            <form ng-submit="uploadFile()">#}
                 {#                <input type="file" file-model="$parent.files" multiple/>#}
                 {#            </form>#}
@@ -121,7 +225,11 @@
 
 
 
+
 {% endblock content %}
 
+<script>
+
+</script>
 
 
