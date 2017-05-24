@@ -11,253 +11,6 @@ app.config(function ($interpolateProvider, $httpProvider) {
     $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 });
 
-
-app.controller('RegisterController', function ($scope, $http, $localStorage) {
-
-
-    // var uploader = $scope.uploader = new FileUploader({
-    //     url: '/api/experiments/',
-    //     method: 'POST',
-    //     alias: "file",
-    //
-    //
-    // });
-
-
-    function successFn() {
-
-    }
-
-    function errorFn(data, status, headers, config) {
-    }
-
-    $scope.backLogin = function () {
-        $scope.loginForm = true;
-        $scope.show = false;
-    }
-
-    $scope.register = function () {
-
-        $http({
-            method: 'POST',
-            url: '/api/register/',
-            data: {'username': $scope.username, 'password': $scope.password}
-        }).then(successFn, errorFn);
-
-    };
-
-    function loadAlldataInUser() {
-        return $http({
-            method: 'GET',
-            url: '/api/users/' + $localStorage.userId + "/posts",
-        }).then(function (response) {
-            $scope.allPosts = response.data;
-        }, function (response) {
-        });
-    }
-
-    $scope.login = function (name) {
-        // console.log('inside');
-        //  console.log('username = ' + $scope.username);
-        $scope.loginForm = false;
-        $localStorage.username = name;
-        $scope.show = false;
-        $http({
-            method: 'GET',
-            url: '/api/users/' + name,
-        }).then(function (response) {
-            $scope.resultUsername = response.data.username;
-            $scope.resultPassword = response.data.password;
-            $scope.resultId = response.data.id;
-            $localStorage.userId = $scope.resultId;
-            loadAlldataInUser();
-            $scope.show = true;
-        }, function (response) {
-        });
-
-
-    };
-
-    $scope.saveNewPost = function () {
-        $http({
-            method: 'POST',
-            url: '/api/posts',
-            data: {
-                'title': $scope.newPost.title,
-                'body': $scope.newPost.body,
-                'number_positive': $scope.newPost.number_positive,
-                'number_float': $scope.newPost.number_float,
-                'author_id': $localStorage.userId,
-            }
-        }).then(function (response) {
-                $scope.uploadFile(response.data.id)
-                    .then(function reloadPage(response) {
-                            loadAlldataInUser();
-                            // $scope.createNewPost.$setPristine();
-                        }
-                    );
-            }, function (response) {
-
-            }
-        );
-
-    };
-
-
-    $scope.uploadFile = function (postId) {
-        var formData = new FormData();
-        // for (var i = 0; i < $scope.files.length; i++) {
-        //     formData.append('file'+i, $scope.files[i]);
-        // }
-        formData.append('length', $scope.files.length);
-        for (var i = 0; i < $scope.files.length; i++) {
-            formData.append('userpic' + i + "[]", $scope.files[i]._file);
-        }
-        // formData.append('userpic[]', $scope.files[0]._file, 'chris1.jpg');
-        // formData.append('userpic[]', $scope.files[1]._file, 'chris2.jpg');
-
-        // formData.append('file', value);
-        // formData.append('file', $scope.files[0]);
-
-        formData.append('post_id', postId);
-        return $http.post('/api/experiments/', formData, {
-            transformRequest: angular.identity,
-            headers: {
-                'Content-Type': undefined
-            }
-        });
-
-    };
-
-    $scope.loadImage = function () {
-        $http({
-            method: 'GET',
-            url: '/api/experiments',
-        }).then(function (response) {
-            $scope.results = response.data;
-        }, function (response) {
-        });
-    };
-
-    $scope.loadPostImage = function (link) {
-        var sublink = link.substr(21);
-        $http({
-            method: 'GET',
-            url: sublink,
-        }).then(function success(response) {
-            $scope.imageUrl = response.data;
-        }, function (response) {
-
-
-        });
-    };
-
-    $scope.files = [];
-    $scope.upload = function () {
-        alert($scope.files.length + " files selected ... Write your Upload Code");
-    };
-
-    $scope.deletePost = function (current_post) {
-        $http({
-            method: 'DELETE',
-            url: '/api/posts/' + current_post.id,
-        }).then(function (response) {
-                loadAlldataInUser();
-            }, function (response) {
-            }
-        );
-    };
-
-    function findDiff(original, edited, exclude_field) {
-        var diff = {}
-        for (var key in original) {
-            if ((exclude_field.indexOf(key) === -1) && (original[key] !== edited[key]))
-                diff[key] = edited[key];
-        }
-        return diff;
-    }
-
-    function countProperties(obj) {
-        var count = 0;
-        // var data = {};
-        for (var prop in obj) {
-            if (obj.hasOwnProperty(prop)) {
-                ++count;
-            }
-        }
-        return count;
-    }
-
-    $scope.saveEditPost = function (edited_post, origin_post) {
-        var exclude_field = ['experiments', 'author', '$$hashKey', 'viewMode'];
-        var fieldChange = findDiff(origin_post, edited_post, exclude_field);
-        debugger;
-        if (countProperties(fieldChange) >= 4) {
-            $http({
-                method: 'PUT',
-                url: '/api/posts/' + origin_post.id,
-                data: {
-                    'title': edited_post.title,
-                    'body': edited_post.body,
-                    'number_positive': edited_post.number_positive,
-                    'number_float': edited_post.number_float,
-                }
-            }).then(function (response) {
-                    edited_post.viewMode = true;
-                    loadAlldataInUser();
-                    // $scope.uploadFile(current_post.id)
-                    //     .then(function reloadPage(response) {
-                    //             loadAlldataInUser();
-                    //             // $scope.createNewPost.$setPristine();
-                    //         }
-                    //     );
-                }, function (response, status, headers, config) {
-                    if (response.data.title) {
-                        alert(' Field Title ' + response.data.title);
-                    }
-                    if (response.data.number_positive) {
-                        alert(' Field Number Positive ' + response.data.number_positive);
-                    }
-                    if (response.data.number_float) {
-                        alert(' Field Number Float ' + response.data.number_float);
-                    }
-                }
-            );
-        }
-        else {
-            $http({
-                method: 'PATCH',
-                url: '/api/posts/' + origin_post.id,
-                data: fieldChange
-            }).then(function (response) {
-                    edited_post.viewMode = true;
-                    loadAlldataInUser();
-                }, function (response, status, headers, config) {
-                    if (response.data.title) {
-                        alert(' Field Title ' + response.data.title);
-                    }
-                    if (response.data.number_positive) {
-                        alert(' Field Number Positive ' + response.data.number_positive);
-                    }
-                    if (response.data.number_float) {
-                        alert(' Field Number Float ' + response.data.number_float);
-                    }
-                }
-            );
-        }
-
-    }
-
-    $scope.editPost = function (current_post) {
-        $scope.selectedPost = angular.copy(current_post);
-        current_post.viewMode = false;
-    };
-    $scope.cancelEditPost = function (current_post) {
-        $scope.selectedPost = {};
-        current_post.viewMode = true;
-    };
-});
-
 app.directive('fileModel', ['$parse', function ($parse) {
     return {
         restrict: 'A',
@@ -304,3 +57,277 @@ app.directive('ngFileModel', ['$parse', function ($parse) {
         }
     };
 }]);
+
+app.service('apiService', ['$http', function ($http) {
+    var result;
+    this.registerApi = function (username, password) {
+        result = $http({
+            method: 'POST',
+            url: '/api/register/',
+            data: {'username': username, 'password': password}
+        });
+
+        return result;
+    };
+
+    this.getAllPostUserApi = function (userId) {
+        result = $http({
+            method: 'GET',
+            url: '/api/users/' + userId + "/posts",
+        });
+
+        return result;
+    };
+
+    this.getUserByNameApi = function (userName) {
+        result = $http({
+            method: 'GET',
+            url: '/api/users/' + userName,
+        });
+        return result;
+    };
+
+    this.addNewPost = function (title, body, number_positive, number_float, user_id) {
+        result = $http({
+            method: 'POST',
+            url: '/api/posts',
+            data: {
+                'title': title,
+                'body': body,
+                'number_positive': number_positive,
+                'number_float': number_float,
+                'author_id': user_id,
+            }
+        });
+        return result;
+    };
+
+    this.postMultiImage = function (form_data) {
+        result = $http.post('/api/experiments/', form_data, {
+            transformRequest: angular.identity,
+            headers: {
+                'Content-Type': undefined
+            }
+        });
+        return result;
+    };
+
+    this.deletePost = function (id) {
+        result = $http({
+            method: 'DELETE',
+            url: '/api/posts/' + id,
+        });
+        return result;
+    };
+
+    this.editPostByPut = function (post_id, number_count, title, body, number_positive, number_float, authorId) {
+        result = $http({
+            method: 'PUT',
+            url: '/api/posts/' + post_id,
+            data: {
+                'numberCount': number_count,
+                'title': title,
+                'body': body,
+                'number_positive': number_positive,
+                'number_float': number_float,
+                'author_id': authorId
+            }
+        });
+        return result;
+    };
+
+    this.editPostByPatch = function (id, object_data) {
+        result = $http({
+            method: 'PATCH',
+            url: '/api/posts/' + id,
+            data: object_data
+        });
+        return result;
+    };
+
+
+}]);
+
+// app.facroty('example', ['$http', '$q', function($http, $q){
+//
+// }]);
+
+app.controller('RegisterController', ['$scope', '$http', '$localStorage', 'apiService', '$q',
+    function ($scope, $http, $localStorage, apiService, $q) {
+
+
+        $scope.uploadFile = function (postId) {
+            var upload = $q.defer();
+            if ($scope.files) {
+                var formData = new FormData();
+                formData.append('length', $scope.files.length);
+                for (var i = 0; i < $scope.files.length; i++) {
+                    formData.append('userpic' + i + "[]", $scope.files[i]._file);
+                }
+                formData.append('post_id', postId);
+                apiService.postMultiImage(formData).then(function () {
+                    upload.resolve();
+                });
+            } else {
+                upload.resolve();
+            }
+            return upload.promise;
+        };
+
+        $scope.backLogin = function () {
+            $scope.loginForm = true;
+            $scope.show = false;
+        };
+
+        $scope.register = function () {
+            var result = apiService.registerApi($scope.username, $scope.password);
+        };
+
+        function loadAlldataInUser() {
+            return apiService.getAllPostUserApi($localStorage.userId).then(function (response) {
+                var allPostsOrigin = response.data;
+                for (var i = 0; i < allPostsOrigin.length; i++) {
+                    // init value for render
+                    allPostsOrigin[i].viewMode = true;
+                    allPostsOrigin[i].errorNumberPos = false;
+                    allPostsOrigin[i].errorTitle = false;
+                    allPostsOrigin[i].errorNumberFloat = false;
+                    allPostsOrigin[i].numberCount = i;
+                }
+                $scope.allPosts = allPostsOrigin;
+            }, function (response) {
+            });
+        }
+
+        $scope.login = function (name) {
+            $scope.loginForm = false;
+            $localStorage.username = name;
+            $scope.show = false;
+            apiService.getUserByNameApi(name)
+                .then(function (response) {
+                    $scope.resultUsername = response.data.username;
+                    $scope.resultPassword = response.data.password;
+                    $scope.resultId = response.data.id;
+                    $localStorage.userId = $scope.resultId;
+                    loadAlldataInUser();
+                    $scope.show = true;
+                }, function (response) {
+                });
+        };
+
+        $scope.saveNewPost = function () {
+            apiService.addNewPost($scope.newPost.title, $scope.newPost.body,
+                $scope.newPost.number_positive, $scope.newPost.number_float, $localStorage.userId)
+                .then(function (response) {
+                        $scope.uploadFile(response.data.id)
+                            .then(function reloadPage(response) {
+                                    loadAlldataInUser();
+                                    clearDataNewPost();
+                                }
+                            );
+                    }, function (response) {
+                        loadAlldataInUser();
+
+                    }
+                );
+        };
+
+        function clearDataNewPost() {
+            $scope.files = undefined;
+            $scope.newPost.title = "";
+            $scope.newPost.body = "";
+            $scope.newPost.number_positive = "";
+            $scope.newPost.number_float = "";
+            angular.element("input[type='file']").val(null);
+        }
+
+
+        $scope.deletePost = function (current_post) {
+            apiService.deletePost(current_post.id).then(function (response) {
+                    loadAlldataInUser();
+                }, function (response) {
+                }
+            );
+        };
+
+        // find number different 2 object without exclude field
+        function findDiff(original, edited, exclude_field) {
+            var diff = {};
+            for (var key in original) {
+                if ((exclude_field.indexOf(key) === -1) && (original[key] !== edited[key]))
+                    diff[key] = edited[key];
+            }
+            return diff;
+        }
+
+        function countProperties(obj) {
+            var count = 0;
+            for (var prop in obj) {
+                if (obj.hasOwnProperty(prop)) {
+                    ++count;
+                }
+            }
+            return count;
+        }
+
+        function handleExceptionEdit(response) {
+            var i = response.config.data.numberCount;
+            if (response.data.title) {
+                $scope.allPosts[i].errorTitle = true;
+                $scope.allPosts[i].messTitle = response.data.title.toString();
+            }
+            if (response.data.number_positive) {
+                $scope.allPosts[i].errorNumberPos = true;
+                $scope.allPosts[i].messNumberPos = response.data.number_positive.toString();
+            }
+            if (response.data.number_float) {
+                $scope.allPosts[i].errorNumberFloat = true;
+                $scope.allPosts[i].messNumberFloat = response.data.number_float.toString();
+            }
+        }
+
+        $scope.saveEditPost = function (edited_post, origin_post) {
+            var exclude_field = ['experiments', 'author', '$$hashKey', 'viewMode'];
+            var objectChange = findDiff(origin_post, edited_post, exclude_field);
+            objectChange.numberCount = origin_post.numberCount;
+            //if change all field
+            if (countProperties(objectChange) >= 4) {
+                apiService.editPostByPut(origin_post.id, origin_post.numberCount, edited_post.title,
+                    edited_post.body, edited_post.number_positive, edited_post.number_float, origin_post.author.id)
+                    .then(function (response) {
+                            loadAlldataInUser();
+                            // must call put or patch for update image
+                            // $scope.uploadFile(current_post.id)
+                            //     .then(function reloadPage(response) {
+                            //             loadAlldataInUser();
+                            //             // $scope.createNewPost.$setPristine();
+                            //         }
+                            //     );
+                        }, function (response) {
+                            handleExceptionEdit(response);
+                        }
+                    );
+            }
+            else {
+                apiService.editPostByPatch(origin_post.id, objectChange).then(function (response) {
+                        edited_post.viewMode = true;
+                        loadAlldataInUser();
+                    }, function (response) {
+                        handleExceptionEdit(response);
+                    }
+                );
+            }
+
+        };
+
+        $scope.editPost = function (current_post) {
+            $scope.selectedPost = angular.copy(current_post);
+            current_post.viewMode = false;
+        };
+        $scope.cancelEditPost = function (current_post) {
+            $scope.selectedPost = {};
+            current_post.viewMode = true;
+        };
+    }
+]);
+

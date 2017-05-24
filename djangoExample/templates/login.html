@@ -1,28 +1,22 @@
 {% extends "base.html" %}
-
 {% block content %}
-
-    <div class="row" ng-app="myApp" ng-controller="RegisterController">
-        <div class="col-md-4 col-md-offset-4"></div>
-        <div class="col-md-4 col-md-offset-4">
-            <div class="well">
-                <div>
+    <div class="row fill-div background-content" ng-app="myApp" ng-controller="RegisterController">
+        <div style="width: 100%">
+            <div class="well fill-div background-content" >
+                <div class="fill-div background-content">
                     <span ng-show="loginForm" ng-init="loginForm = true">
                          <h1>Login or Register</h1>
                         <form role="form" ng-submit="register()" name="registerForm">
                             {% csrf_token %}
-
                             <div class="form-group">
                                 <label for="login__email">Username</label>
                                 <input type="text" class="form-control" id="login__user" ng-model="username" required
                                 />
                             </div>
-
                             <div class="form-group">
                                 <label for="login__password">Password</label>
                                 <input type="password" class="form-control" id="login__password" ng-model="password"
-                                       required
-                                />
+                                       required/>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary">Register</button>
@@ -30,11 +24,10 @@
                         </form>
                         <br/>
                         <div>
-                            <button ng-click="login(username)" class="btn btn-primary" style="width: 96px;">Login</button>
+                            <button ng-click="login(username)" class="btn btn-primary"
+                                    style="width: 96px;">Login</button>
                         </div>
                     </span>
-
-
                     <span ng-show="show">
                         <div class="row">
                             <div class="col-sm-4">
@@ -45,17 +38,14 @@
                                 <button type="submit" class="btn btn-primary"
                                         ng-click="backLogin()">Back to login</button>
                             </div>
-
                         </div>
                         <input type="text" class="form-control" ng-value="resultUsername" ng-model="resultUsername"
                                ng-readonly="true">
                         <input type="text" class="form-control" ng-value="resultPassword" ng-model="resultPassword"
                                ng-readonly="true">
                         <br/>
-
                         <h5>All Post This User</h5>
-                        <div ng-repeat="x in allPosts" style="border:solid 1px;margin-bottom: 30px;"
-                             ng-init="x.viewMode=true">
+                        <div ng-repeat="x in allPosts" style="border:solid 1px;margin-bottom: 30px;">
                             <div class="row">
                                 <div class="col-sm-4">
                                     <button class="btn btn-success" ng-click="editPost(x)" ng-show="x.viewMode">Edit post</button>
@@ -72,7 +62,6 @@
                                 </div>
                             </div>
                             <br/>
-
                             <div ng-show="x.viewMode">
                                 <div class="row">
                                     <div class="col-sm-4">
@@ -100,6 +89,7 @@
                                          {$ x.number_positive $}
                                     </div>
                                 </div>
+
                                 <br/>
                                 <div class="row">
                                     <div class="col-sm-4">
@@ -110,7 +100,6 @@
                                     </div>
                                 </div>
                             </div>
-
                              <div ng-show="!x.viewMode">
                                  <form name="editForm">
                                      <div class="row">
@@ -118,9 +107,16 @@
                                      <label>Post title : </label>
                                         </div>
                                     <div class="col-sm-4">
-                                     <input type="text" ng-model="selectedPost.title" required name="title"/>
+                                     <input type="text" ng-model="selectedPost.title" name="title"
+                                            ng-keypress="x.errorTitle=false"/>
                                          </div>
                                     </div>
+                                     <div class="row" ng-show="x.errorTitle" style="color:red;">
+                                         <div class="col-sm-4"></div>
+                                         <div class="col-sm-6">
+                                            <label>  {$ x.messTitle $}</label>
+                                         </div>
+                                     </div>
                                     <br/>
                                      <div class="row">
                                         <div class="col-sm-4">
@@ -130,31 +126,43 @@
                                         <input type="text" ng-model="selectedPost.body" name="body"/>
                                          </div>
                                     </div>
+
                                     <br/>
                                      <div class="row">
                                         <div class="col-sm-4">
-                                    <label>Number Positive : </label>
+                                    <label>Number Positive</label>
                                               </div>
                                     <div class="col-sm-4">
                                       <input type="text" ng-model="selectedPost.number_positive"
+                                             ng-keypress="x.errorNumberPos=false"
                                              name="number_positive"/>
                                         </div>
                                     </div>
+                                      <div class="row" ng-show="x.errorNumberPos" style="color:red;">
+                                          <div class="col-sm-4"></div>
+                                          <div class="col-sm-6">
+                                            {$ x.messNumberPos $}
+                                          </div>
+                                     </div>
                                     <br/>
                                      <div class="row">
                                         <div class="col-sm-4">
                                     <label>Number Float : </label>
                                               </div>
                                     <div class="col-sm-4">
-                                    <input type="text" ng-model="selectedPost.number_float" name="number_float"/>
+                                    <input type="text" ng-model="selectedPost.number_float"
+                                           ng-keypress="x.errorNumberFloat=false"
+                                           name="number_float"/>
                                          </div>
                                     </div>
+                                     <div class="row" ng-show="x.errorNumberFloat" style="color:red;">
+                                         <div class="col-sm-4"></div>
+                                         <div class="col-sm-6">
+                                            <label>{$ x.messNumberFloat $}</label>
+                                         </div>
+                                     </div>
                                  </form>
                             </div>
-
-
-
-
                             <br/>
                             <label>Image : </label>
                             <div ng-repeat="image in x.experiments">
@@ -165,12 +173,10 @@
                             </div>
 
                         </div>
-
-
                 <br/>
                 <h5>Create a New Post</h5>
                 <div>
-                    <form class="form-inline">
+                    <form class="form-inline ">
                         <div class="form-group block-level">
                             <input type="text" class="form-control" ng-model="newPost.title" placeholder="Title">
                         </div>
@@ -185,8 +191,7 @@
                             <input type="text" class="form-control" ng-model="newPost.number_float"
                                    placeholder="Number Float">
                         </div>
-                        <div class="form-group">
-    {#                        <input type="file" file-model="files" multiple/>#}
+                        <div class="form-group" style="width: 337px;">
                             <input type="file" ng-file-model="files" multiple/>
                         </div>
                         <div>
@@ -194,42 +199,13 @@
                         </div>
                     </form>
                 </div>
-                {#            <form ng-submit="uploadFile()">#}
-                {#                <input type="file" file-model="$parent.files" multiple/>#}
-                {#            </form>#}
-
                 </span>
-
                 </div>
-                {#                <form>#}
-                {#                    <h2>Load image here </h2>#}
-                {#                    <div ng-repeat="result in results">#}
-                {#                        <img ng-src="{$result.samplesheet$}" ng-alt="{$result.id$}" ng-title="{$result.id$}"#}
-                {#                             height=128#}
-                {#                             width=128 alt="share resources" class="pull-left img-circle"/>#}
-                {#                        <br/>#}
-                {#                    </div>#}
-                {#                    <br/>#}
-                {##}
-                {#                    <button ng-click="loadImage()">Load Image</button>#}
-                {#                </form>#}
-
-
-                {#                <input type="file" ng-file-model="files" multiple/>#}
-                {#                <button type="button" ng-click="upload()">Upload</button>#}
-
-
             </div>
         </div>
+
     </div>
-
-
-
-
 {% endblock content %}
 
-<script>
-
-</script>
 
 

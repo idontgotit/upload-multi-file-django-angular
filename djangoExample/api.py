@@ -74,6 +74,8 @@ class PostDetail(PostMixin, generics.RetrieveUpdateDestroyAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
     def delete(self,request, pk, format=None):
         instance = self.get_object()
         instance.delete()
